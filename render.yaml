@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: coturn-server
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: PORT
+        value: 3478
+    healthCheckPath: /
