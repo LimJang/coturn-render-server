@@ -7,4 +7,4 @@ services:
     envVars:
       - key: PORT
         value: 3478
-    healthCheckPath: /
+    # healthCheckPath: /  <- 이 줄 삭제
