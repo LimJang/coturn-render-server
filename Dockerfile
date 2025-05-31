@@ -1,8 +1,10 @@
 FROM coturn/coturn:latest
 
-# 필요한 패키지 설치 (Debian/Ubuntu용)
+# Root 권한으로 실행
 USER root
-RUN apt-get update && apt-get install -y wget curl && rm -rf /var/lib/apt/lists/*
+
+# 필요한 패키지 설치
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
 # CoTURN 설정 파일 생성
 RUN echo "listening-port=\$PORT" > /tmp/turnserver.conf && \
@@ -15,5 +17,12 @@ RUN echo "listening-port=\$PORT" > /tmp/turnserver.conf && \
     echo "verbose" >> /tmp/turnserver.conf && \
     echo "fingerprint" >> /tmp/turnserver.conf
 
-# CoTURN 서버 실행
-CMD ["sh", "-c", "EXTERNAL_IP=$(wget -qO- http://ifconfig.me 2>/dev/null || curl -s http://ifconfig.me || echo '0.0.0.0') && turnserver -c /tmp/turnserver.conf --external-ip=$EXTERNAL_IP"]
+# 간단한 시작 스크립트 생성
+RUN echo '#!/bin/bash' > /start.sh && \
+    echo 'EXTERNAL_IP=$(wget -qO- http://ifconfig.me || echo "0.0.0.0")' >> /start.sh && \
+    echo 'echo "External IP: $EXTERNAL_IP"' >> /start.sh && \
+    echo 'exec /usr/bin/turnserver -c /tmp/turnserver.conf --external-ip=$EXTERNAL_IP' >> /start.sh && \
+    chmod +x /start.sh
+
+# 시작 스크립트 실행
+CMD ["/start.sh"]
